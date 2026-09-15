@@ -98,11 +98,13 @@ class EasyTranslate(commands.Cog):
             message = reference.resolved or reference.cached_message or await ctx.channel.fetch_message(reference.message_id) # type: ignore
             if not message:
                 return await ctx.channel.send(MISSING_INPUTS)
-        assert message
-        if not content:
+        if not content and message:
             content = message.content
             for embed in [e for e in message.embeds if e.description]:
                 content += '\n' + (embed.description or "")
+
+        if not content:
+            return await ctx.channel.send(MISSING_INPUTS)
         content = self.convert_input(content)
         try:
             result: Translated = await asyncio.to_thread(self.translator.translate, content, language, "auto")
